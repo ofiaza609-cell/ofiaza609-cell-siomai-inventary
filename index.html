@@ -57,8 +57,9 @@ input, select { padding: 6px; border: 1px solid #ddd; border-radius: 5px; margin
 .log-item-name { font-weight: bold; }
 .log-item-desc { color: #666; font-size: 10px; }
 .log-item-meta { font-size: 9px; color: #999; }
-.waste-text { color: red; }
-.wrapper-text { color: #2196F3; }
+.waste-text { color: #FF9800; }
+.wrapper-text { color: #2196F3; font-weight: bold; }
+.input-label { font-size: 10px; color: #666; margin-left: 3px; }
 @media print {
   @page { size: 58mm auto!important; margin: 0!important; }
   html, body { width: 58mm!important; height: fit-content!important; margin: 0!important; padding: 0!important; overflow: hidden!important; }
@@ -112,15 +113,35 @@ input, select { padding: 6px; border: 1px solid #ddd; border-radius: 5px; margin
 
 <div class="card">
 <h3>📅 Daily Production Log</h3>
-<input id="prodDate" type="date" style="width:48%">
-<select id="prodProduct" style="width:48%">
+<div style="display:flex;flex-wrap:wrap;">
+<div style="width:48%;margin-right:4%;">
+<input id="prodDate" type="date" style="width:100%">
+<div class="input-label">Date</div>
+</div>
+<div style="width:48%;">
+<select id="prodProduct" style="width:100%">
 <option value="">Select Product</option>
 </select>
-<input id="prodQty" type="number" placeholder="Qty Produced: 500 pcs" style="width:48%">
-<input id="prodWaste" type="number" placeholder="Waste: 5 pcs" style="width:48%">
-<input id="prodWrapper" type="number" placeholder="Wrapper Used: 1750 grams" style="width:48%">
-<input id="prodDesc" placeholder="Notes: Luto ni Juan" style="width:48%">
-<button class="btn" onclick="addProductionLog()" style="width:100%;margin-top:5px;">+ Log Production</button>
+<div class="input-label">Product</div>
+</div>
+<div style="width:48%;margin-right:4%;">
+<input id="prodQty" type="number" placeholder="500" style="width:100%">
+<div class="input-label">Qty Produced (pcs)</div>
+</div>
+<div style="width:48%;">
+<input id="prodWaste" type="number" placeholder="5" style="width:100%">
+<div class="input-label">Waste (pcs) - Not deducted</div>
+</div>
+<div style="width:48%;margin-right:4%;">
+<input id="prodWrapper" type="number" placeholder="1750" style="width:100%">
+<div class="input-label">Wrapper Used (grams)</div>
+</div>
+<div style="width:48%;">
+<input id="prodDesc" placeholder="Luto ni Juan" style="width:100%">
+<div class="input-label">Notes</div>
+</div>
+</div>
+<button class="btn" onclick="addProductionLog()" style="width:100%;margin-top:8px;">+ Log Production</button>
 
 <div style="margin-top:10px;max-height:200px;overflow-y:auto;border-top:1px solid #ddd;padding-top:8px;">
 <div style="font-weight:bold;font-size:12px;margin-bottom:5px;">Today's Logs:</div>
@@ -591,8 +612,8 @@ function addProductionLog(){
     desc:desc
   });
 
-  // Auto-add sa stock: Produced - Waste lang. HINDI kasama wrapper
-  product.stock += (qty - waste);
+  // FIXED: Waste HINDI na ibabawas sa stock. Produced lang ang dagdag.
+  product.stock += qty;
 
   saveData();
   renderProducts();
@@ -603,7 +624,7 @@ function addProductionLog(){
   document.getElementById('prodWaste').value='';
   document.getElementById('prodWrapper').value='';
   document.getElementById('prodDesc').value='';
-  alert('Production logged! +'+(qty-waste)+' added to '+product.name+' stock');
+  alert('Production logged! +'+qty+' added to '+product.name+' stock');
 }
 
 function renderProductionLogs(){
@@ -618,8 +639,8 @@ function renderProductionLogs(){
       var log = todayLogs[i];
       html += '<div class="log-item">';
       html += '<div class="log-item-name">'+log.productName+' - '+log.qty+'pcs';
-      if(log.waste>0) html += ' <span class="waste-text">(-'+log.waste+' waste)</span>';
-      if(log.wrapper>0) html += ' <span class="wrapper-text">['+log.wrapper+'g wrapper]</span>';
+      if(log.waste>0) html += ' <span class="waste-text">(waste: '+log.waste+' pcs)</span>';
+      if(log.wrapper>0) html += ' <span class="wrapper-text">[wrapper: '+log.wrapper+' grams]</span>';
       html += '</div>';
       if(log.desc) html += '<div class="log-item-desc">'+log.desc+'</div>';
       html += '<div class="log-item-meta">'+log.date+' <button onclick="deleteProdLog('+log.id+')" style="background:red;color:white;border:none;padding:1px 4px;border-radius:2px;font-size:8px;margin-left:5px;">X</button></div>';
@@ -638,18 +659,4 @@ function deleteProdLog(id){
       for(var j=0;j<products.length;j++){
         if(products[j].id===log.productId){product=products[j];break;}
       }
-      if(product) product.stock -= (log.qty - log.waste);
-      productionLogs.splice(i,1);
-      break;
-    }
-  }
-  saveData();
-  renderProducts();
-  renderProduction();
-  renderProductionLogs();
-}
-
-initApp();
-</script>
-</body>
-</html>
+      // FIXED: Pag delete, bawas buong qty
