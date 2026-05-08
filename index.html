@@ -246,6 +246,7 @@ function initApp(){
   if(savedProducts && JSON.parse(savedProducts).length > 0) {
     products = JSON.parse(savedProducts);
   } else {
+    // FIXED: Force load defaults pag empty
     products = defaultProducts.slice();
     saveData();
   }
@@ -443,4 +444,18 @@ function renderProduction(){
       lastCat = p.cat;
     }
     html += '<div class="stock-item">';
-    html += '<div class="stock-item-name">'+p.name+'</div
+    html += '<div class="stock-item-name">'+p.name+'</div>';
+    html += '<div class="stock-item-price">₱'+p.price+'</div>';
+    html += '<div class="stock-item-qty">Stock: '+p.stock+'</div>';
+    html += '<input type="number" class="stock-input" id="prod-'+p.id+'" placeholder="+Stock" min="1">';
+    html += '<input type="number" class="price-input" id="price-'+p.id+'" value="'+p.price+'" min="0">';
+    html += '<div class="btn-group">';
+    html += '<button class="btn-production" onclick="addProduction('+p.id+')">+Stock</button>';
+    html += '<button class="btn-price" onclick="updatePrice('+p.id+')">₱Price</button>';
+    html += '</div></div>';
+  }
+  document.getElementById('productionList').innerHTML = html;
+}
+
+function addProduction(id){
+  var input = document.getElementById
