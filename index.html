@@ -57,7 +57,7 @@ input, select { padding: 6px; border: 1px solid #ddd; border-radius: 5px; margin
 .log-item-name { font-weight: bold; }
 .log-item-desc { color: #666; font-size: 10px; }
 .log-item-meta { font-size: 9px; color: #999; }
-.waste-text { color: #FF9800; }
+.waste-text { color: #FF9800; font-weight: bold; }
 .wrapper-text { color: #2196F3; font-weight: bold; }
 .input-label { font-size: 10px; color: #666; margin-left: 3px; margin-bottom: 5px; }
 @media print {
@@ -130,7 +130,7 @@ input, select { padding: 6px; border: 1px solid #ddd; border-radius: 5px; margin
 </div>
 <div style="width:48%;">
 <input id="prodWaste" type="number" placeholder="5" style="width:100%">
-<div class="input-label">Waste (pcs) - Tracking only</div>
+<div class="input-label">Waste (grams) - Tracking only</div>
 </div>
 <div style="width:48%;margin-right:4%;">
 <input id="prodWrapper" type="number" placeholder="1750" style="width:100%">
@@ -612,7 +612,7 @@ function addProductionLog(){
     desc:desc
   });
 
-  // FIXED: Waste HINDI na ibabawas sa stock. Buong Produced ang dagdag.
+  // CORRECT LOGIC: Waste HINDI BINABAWAS. Buong qty lang dagdag sa stock kasi pcs yun
   product.stock += qty;
 
   saveData();
@@ -639,7 +639,7 @@ function renderProductionLogs(){
       var log = todayLogs[i];
       html += '<div class="log-item">';
       html += '<div class="log-item-name">'+log.productName+' - '+log.qty+'pcs';
-      if(log.waste>0) html += ' <span class="waste-text">(waste: '+log.waste+' pcs)</span>';
+      if(log.waste>0) html += ' <span class="waste-text">(waste: '+log.waste+' grams)</span>';
       if(log.wrapper>0) html += ' <span class="wrapper-text">[wrapper: '+log.wrapper+' grams]</span>';
       html += '</div>';
       if(log.desc) html += '<div class="log-item-desc">'+log.desc+'</div>';
@@ -649,8 +649,3 @@ function renderProductionLogs(){
   }
   document.getElementById('productionLogsList').innerHTML = html;
 }
-
-function deleteProdLog(id){
-  if(!confirm('Delete this log? Stock will be adjusted.')) return;
-  for(var i=0;i<productionLogs.length;i++){
-    if(productionLogs[i].id===id){
