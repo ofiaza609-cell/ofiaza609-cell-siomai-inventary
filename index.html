@@ -58,6 +58,7 @@ input, select { padding: 6px; border: 1px solid #ddd; border-radius: 5px; margin
 .log-item-desc { color: #666; font-size: 10px; }
 .log-item-meta { font-size: 9px; color: #999; }
 .waste-text { color: red; }
+.wrapper-text { color: #2196F3; }
 @media print {
   @page { size: 58mm auto!important; margin: 0!important; }
   html, body { width: 58mm!important; height: fit-content!important; margin: 0!important; padding: 0!important; overflow: hidden!important; }
@@ -115,9 +116,10 @@ input, select { padding: 6px; border: 1px solid #ddd; border-radius: 5px; margin
 <select id="prodProduct" style="width:48%">
 <option value="">Select Product</option>
 </select>
-<input id="prodQty" type="number" placeholder="Qty Produced: 500" style="width:48%">
-<input id="prodWaste" type="number" placeholder="Waste: 5" style="width:48%">
-<input id="prodDesc" placeholder="Description: Luto ni Juan" style="width:100%">
+<input id="prodQty" type="number" placeholder="Qty Produced: 500 pcs" style="width:48%">
+<input id="prodWaste" type="number" placeholder="Waste: 5 pcs" style="width:48%">
+<input id="prodWrapper" type="number" placeholder="Wrapper Used: 1750 grams" style="width:48%">
+<input id="prodDesc" placeholder="Notes: Luto ni Juan" style="width:48%">
 <button class="btn" onclick="addProductionLog()" style="width:100%;margin-top:5px;">+ Log Production</button>
 
 <div style="margin-top:10px;max-height:200px;overflow-y:auto;border-top:1px solid #ddd;padding-top:8px;">
@@ -565,10 +567,11 @@ function addProductionLog(){
   var productId = parseInt(document.getElementById('prodProduct').value);
   var qty = parseInt(document.getElementById('prodQty').value)||0;
   var waste = parseInt(document.getElementById('prodWaste').value)||0;
+  var wrapper = parseInt(document.getElementById('prodWrapper').value)||0;
   var desc = document.getElementById('prodDesc').value.trim();
 
   if(!date ||!productId || qty<=0){
-    alert('Fill Date, Product, and Qty!');
+    alert('Fill Date, Product, and Qty Produced!');
     return;
   }
 
@@ -584,9 +587,11 @@ function addProductionLog(){
     productName:product.name,
     qty:qty,
     waste:waste,
+    wrapper:wrapper,
     desc:desc
   });
 
+  // Auto-add sa stock: Produced - Waste lang. HINDI kasama wrapper
   product.stock += (qty - waste);
 
   saveData();
@@ -596,6 +601,7 @@ function addProductionLog(){
 
   document.getElementById('prodQty').value='';
   document.getElementById('prodWaste').value='';
+  document.getElementById('prodWrapper').value='';
   document.getElementById('prodDesc').value='';
   alert('Production logged! +'+(qty-waste)+' added to '+product.name+' stock');
 }
@@ -613,6 +619,7 @@ function renderProductionLogs(){
       html += '<div class="log-item">';
       html += '<div class="log-item-name">'+log.productName+' - '+log.qty+'pcs';
       if(log.waste>0) html += ' <span class="waste-text">(-'+log.waste+' waste)</span>';
+      if(log.wrapper>0) html += ' <span class="wrapper-text">['+log.wrapper+'g wrapper]</span>';
       html += '</div>';
       if(log.desc) html += '<div class="log-item-desc">'+log.desc+'</div>';
       html += '<div class="log-item-meta">'+log.date+' <button onclick="deleteProdLog('+log.id+')" style="background:red;color:white;border:none;padding:1px 4px;border-radius:2px;font-size:8px;margin-left:5px;">X</button></div>';
